@@ -48,9 +48,11 @@ const selectSubItem = (item: string) => {
   emit('subItemChange', item)
 }
 
+const apiUrl = import.meta.env.VITE_API_URL
+
 const fetchProducts = async () => {
   try {
-    const response = await fetch('api/product_names')
+    const response = await fetch(`${apiUrl}/product_names`)
     if (!response.ok) {
       throw new Error('Failed to fetch Products')
     }
@@ -73,7 +75,7 @@ const fetchSubData = async () => {
 
   if (selectedProduct.value) {
     try {
-      const response = await fetch(`api/product_data/${selectedProduct.value}`)
+      const response = await fetch(`${apiUrl}/product_data/${selectedProduct.value}`)
       if (!response.ok) {
         throw new Error('Failed to fetch sub-data')
       }

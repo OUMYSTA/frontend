@@ -1,6 +1,7 @@
 <template>
   <div class="w-full carousel carousel-vertical h-[20rem] overflow-y-auto">
     <div class="p-10 carousel-item flex-col">
+      <!-- Location Dropdown -->
       <select
         id="locationSelect"
         class="select select-bordered"
@@ -13,16 +14,21 @@
         </option>
       </select>
 
+      <!-- Sub-Data List -->
       <div v-if="subData.length > 0" class="mt-4">
         <ul class="menu bg-base-200 w-56 rounded-box">
           <li v-for="(item, idx) in subData" :key="idx">
-            <a @click="selectSubItem(item)" :class="{ active: item === selectedSubItem }">{{
-              item
-            }}</a>
+            <a @click="selectSubItem(item)" :class="{ active: item === selectedSubItem }">{{ item }}</a>
           </li>
         </ul>
       </div>
 
+      <!-- No Sub-Data -->
+      <div v-if="subData.length === 0 && !errorMessage && selectedLocation" class="mt-2">
+        No sub-data available for the selected location.
+      </div>
+
+      <!-- Error Message -->
       <div v-if="errorMessage" class="text-red-500 mt-2">
         {{ errorMessage }}
       </div>
@@ -33,31 +39,28 @@
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue'
 
+// Define Props
 const props = defineProps<{
   initialLocation?: string
 }>()
 
+// Define Emitted Events
 const emit = defineEmits(['locationChange', 'subLocationChange'])
 
+// Reactive Data
 const selectedLocation = ref<string>(props.initialLocation || '')
-const selectedSubItem = ref<string>('')
+const selectedSubItem = ref<string>('') 
 const subData = ref<string[]>([])
 const locationsList = ref<string[]>([])
 const errorMessage = ref<string | null>(null)
 
-const onLocationChange = async () => {
-  emit('locationChange', selectedLocation.value)
-  await fetchSubData()
-}
+// Base API URL from Environment Variable
+const apiUrl = import.meta.env.VITE_API_URL
 
-const selectSubItem = (item: string) => {
-  selectedSubItem.value = item
-  emit('subLocationChange', item)
-}
-
+// Fetch Location Names
 const fetchLocations = async () => {
   try {
-    const response = await fetch('api/location_names')
+    const response = await fetch(`${apiUrl}/api/location_names`)
     if (!response.ok) throw new Error('Failed to fetch locations')
     locationsList.value = await response.json()
   } catch (error) {
@@ -65,6 +68,7 @@ const fetchLocations = async () => {
   }
 }
 
+// Fetch Sub-Data Based on Location
 const fetchSubData = async () => {
   subData.value = []
   selectedSubItem.value = ''
@@ -72,7 +76,7 @@ const fetchSubData = async () => {
 
   if (selectedLocation.value) {
     try {
-      const response = await fetch(`api/location_data/${selectedLocation.value}`)
+      const response = await fetch(`${apiUrl}/api/location_data/${selectedLocation.value}`)
       if (!response.ok) throw new Error('Failed to fetch sub-data')
       const data = await response.json()
       if (Array.isArray(data)) {
@@ -86,6 +90,19 @@ const fetchSubData = async () => {
   }
 }
 
+// Handle Location Change
+const onLocationChange = async () => {
+  emit('locationChange', selectedLocation.value)
+  await fetchSubData()
+}
+
+// Handle Sub-Item Selection
+const selectSubItem = (item: string) => {
+  selectedSubItem.value = item
+  emit('subLocationChange', item)
+}
+
+// Fetch Locations on Mounted
 onMounted(() => {
   fetchLocations()
   if (props.initialLocation) {
@@ -93,6 +110,7 @@ onMounted(() => {
   }
 })
 
+// Watch Prop Change for Initial Location
 watch(
   () => props.initialLocation,
   (newValue) => {
