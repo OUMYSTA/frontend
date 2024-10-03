@@ -54,13 +54,10 @@ const subData = ref<string[]>([])
 const locationsList = ref<string[]>([])
 const errorMessage = ref<string | null>(null)
 
-// Base API URL from Environment Variable
-const apiUrl = import.meta.env.VITE_API_URL
-
 // Fetch Location Names
 const fetchLocations = async () => {
   try {
-    const response = await fetch(`${apiUrl}/api/location_names`)
+    const response = await fetch(`https://backend-app-price.onrender.com/location_names`)
     if (!response.ok) throw new Error('Failed to fetch locations')
     locationsList.value = await response.json()
   } catch (error) {
@@ -76,7 +73,7 @@ const fetchSubData = async () => {
 
   if (selectedLocation.value) {
     try {
-      const response = await fetch(`${apiUrl}/api/location_data/${selectedLocation.value}`)
+      const response = await fetch(`https://backend-app-price.onrender.com/location_data/${selectedLocation.value}`)
       if (!response.ok) throw new Error('Failed to fetch sub-data')
       const data = await response.json()
       if (Array.isArray(data)) {

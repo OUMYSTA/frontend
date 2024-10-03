@@ -167,12 +167,11 @@ const handleSubItemChange = (value: string) => {
   subItem.value = value
 }
 
-const apiUrl = import.meta.env.VITE_API_URL
 
 const submit = async () => {
   if (startLocation.value && endSubLocation.value && productType.value && subItem.value) {
     try {
-      const response = await fetch(`${apiUrl}/check-product`, {
+      const response = await fetch(`https://backend-app-price.onrender.com/check-product`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
